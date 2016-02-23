@@ -62,3 +62,5 @@ target/
 .ipynb_checkpoints
 config.json
 
+*followers_ids.json
+*followers.json
