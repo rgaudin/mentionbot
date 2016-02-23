@@ -4,47 +4,44 @@
 
 from __future__ import (unicode_literals, absolute_import,
                         division, print_function)
-import logging
-import json
+from config import (api, logger, BREAK_AT, TARGET,
+                    get_followers, save_followers)
 
-import tweepy
-
-CONFIG = json.load(open('config.json', 'r'))
-CONSUMER_KEY = CONFIG.get('CONSUMER_KEY')
-CONSUMER_SECRET = CONFIG.get('CONSUMER_SECRET')
-ACCESS_TOKEN = CONFIG.get('ACCESS_TOKEN')
-ACCESS_TOKEN_SECRET = CONFIG.get('ACCESS_TOKEN_SECRET')
-TARGET = CONFIG.get('TARGET')
-BREAK_AT = CONFIG.get('BREAK_AT')
-
-logging.basicConfig(level=logging.INFO)
-logger = logging.getLogger(__name__)
-
-auth = tweepy.OAuthHandler(CONSUMER_KEY, CONSUMER_SECRET)
-auth.set_access_token(ACCESS_TOKEN, ACCESS_TOKEN_SECRET)
-api = tweepy.API(auth, wait_on_rate_limit=True)
-
-# followers
+# intro
 target = api.get_user(TARGET)
 logger.info("{} has {} followers".format(TARGET, target.followers_count))
 
-# retrieve list of followers
+# store existing list of actual followers
+followers = get_followers()
+existing_fids = [f['fid'] for f in followers]
+
+# retrieve new list of followers ids
 followers_ids = api.followers_ids(TARGET)
-with open('{}_followers_ids.json'.format(TARGET), 'w') as f:
-    json.dump(followers_ids, f)
+new_followers_ids = [fid for fid in followers_ids if fid not in existing_fids]
 
-logger.info("Found {} followers IDs".format(len(followers_ids)))
+# save updated list of followers (with new ids)
+for fid in new_followers_ids:
+    followers.append({'fid': fid})
+save_followers(followers)
 
-followers = []
-c = 0
-for fid in followers_ids:
-    screen_name = api.get_user(fid).screen_name
-    followers.append(screen_name)
-    c += 1
-    if BREAK_AT and c >= BREAK_AT:
+logger.info("Found {} new followers IDs"
+            .format(len(new_followers_ids)))
+
+# get screen_name for each fid in followers
+count = 0
+for follower in followers:
+    if follower.get('screen_name'):
+        continue
+
+    logger.info("Fetching screen_name for {}".format(follower['fid']))
+
+    follower['screen_name'] = api.get_user(follower['fid']).screen_name
+    count += 1
+
+    # break after a number of requests (dev)
+    if BREAK_AT and count >= BREAK_AT:
         break
 
-with open('{}_followers.json'.format(TARGET), 'w') as f:
-    json.dump(followers, f)
+save_followers(followers)
 
-from pprint import pprint as pp ; pp(followers)
+logger.info("All done.")

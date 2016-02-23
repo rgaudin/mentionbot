@@ -4,5 +4,6 @@
   "ACCESS_TOKEN": "",
   "ACCESS_TOKEN_SECRET": "",
   "TARGET": "",
-  "BREAK_AT": null
+  "BREAK_AT": null,
+  "PAUSE_DELAY": 60
 }
