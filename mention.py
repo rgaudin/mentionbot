@@ -5,6 +5,7 @@
 from __future__ import (unicode_literals, absolute_import,
                         division, print_function)
 import time
+import random
 
 from config import (api, logger, PAUSE_DELAY, tweepy,
                     get_followers, save_followers, get_messages)
@@ -31,12 +32,12 @@ for follower in followers:
     follower['handled'] = True
     save_followers(followers)
 
-    for message in messages:
-        try:
-            tweet_and_wait(message.get("text")
-                           .format(screen_name=follower['screen_name']),
-                           media=message.get("media"))
-        except tweepy.error.TweepError as e:
-            logger.exception(e)
+    message = random.choice(messages)
+    try:
+        tweet_and_wait(message.get("text")
+                       .format(screen_name=follower['screen_name']),
+                       media=message.get("media"))
+    except tweepy.error.TweepError as e:
+        logger.exception(e)
 
 logger.info("All done")

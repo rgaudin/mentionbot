@@ -15,12 +15,12 @@ CONSUMER_KEY = CONFIG.get('CONSUMER_KEY')
 CONSUMER_SECRET = CONFIG.get('CONSUMER_SECRET')
 ACCESS_TOKEN = CONFIG.get('ACCESS_TOKEN')
 ACCESS_TOKEN_SECRET = CONFIG.get('ACCESS_TOKEN_SECRET')
-TARGET = CONFIG.get('TARGET')
+TARGETS = CONFIG.get('TARGETS')
 BREAK_AT = CONFIG.get('BREAK_AT')
 PAUSE_DELAY = CONFIG.get('PAUSE_DELAY')
 
-followers_fname = '{}_followers.json'.format(TARGET)
-messages_fname = '{}_messages.json'.format(TARGET)
+followers_fname = 'followers.json'
+messages_fname = 'messages.json'
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
@@ -34,6 +34,10 @@ def get_followers():
     if os.path.isfile(followers_fname):
         return json.load(open(followers_fname, 'r'))
     return []
+
+
+def get_followers_ids(followers):
+    return [f['fid'] for f in followers]
 
 
 def get_messages():
