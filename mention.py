@@ -22,13 +22,14 @@ def tweet_and_wait(message, media=None):
 followers = get_followers()
 messages = get_messages()
 assert len(messages) > 0
+random.shuffle(followers)
 
 for follower in followers:
     # skip completed ones
     if follower.get('handled', False):
         continue
 
-    logger.info("Talking to {}".format(follower))
+    # mark as complete
     follower['handled'] = True
     save_followers(followers)
 
