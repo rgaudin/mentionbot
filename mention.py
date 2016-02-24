@@ -29,10 +29,6 @@ for follower in followers:
     if follower.get('handled', False):
         continue
 
-    # mark as complete
-    follower['handled'] = True
-    save_followers(followers)
-
     message = random.choice(messages)
     try:
         tweet_and_wait(message.get("text")
@@ -40,5 +36,9 @@ for follower in followers:
                        media=message.get("media"))
     except tweepy.error.TweepError as e:
         logger.exception(e)
+    else:
+        # mark as complete
+        follower['handled'] = True
+        save_followers(followers)
 
 logger.info("All done")
